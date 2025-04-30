@@ -1,0 +1,20 @@
+{
+    "name": "gaspard-v/php-shell",
+    "description": "A PHP online shell for PHP 7.0+",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "GaspardV\\PhpShell\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "gaspard-v",
+            "email": "60385905+gaspard-v@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "twig/twig": "^3.0"
+    }
+}
