@@ -4,6 +4,10 @@
     "ghcr.io/devcontainers/features/php:1": {
       "version": "8.4",
       "installComposer": true
+    },
+    "ghcr.io/devcontainers-extra/features/http-server:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
     }
   }
 }
