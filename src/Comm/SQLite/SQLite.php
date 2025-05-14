@@ -1,10 +1,11 @@
 <?php
 
-namespace GaspardV\PhpShell\Comm;
+namespace GaspardV\PhpShell\Comm\SQLite;
 
 use SQLite3;
+use GaspardV\PhpShell\Comm;
 
-class SQLite implements CommInterface
+class SQLite implements Comm\CommInterface
 {
     protected static const FILENAME  = "messages.db";
     protected static const ENCRYPTION_KEY = "f*pF4HI6%OC6TVl7lTZY"; // TODO use env variable
@@ -53,18 +54,26 @@ class SQLite implements CommInterface
             ':message_type', 
             zeroblob({$size})
         )
-        RETURNING message_id
         EOF;
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':worker_id', $workerId, SQLITE3_TEXT);
         $stmt->bindValue(':job_id', $jobId, SQLITE3_TEXT);
         $stmt->bindValue(':message_type', $messageType, SQLITE3_TEXT);
-        $result = $stmt->execute();
-        $result->fetchArray(SQLITE3_ASSOC);
+        $stmt->execute();
+        $rowId = $this->db->lastInsertRowID();
 
-        // TODO finish this
-        $this->db->openBlob(self::TABLENAME, 'message', 1, 'main', SQLITE3_OPEN_READWRITE);
-        return null;
+        if ($rowId <= 0) return null;
+
+        $res = $this->db->openBlob(self::TABLENAME, 'message', $rowId, 'main', SQLITE3_OPEN_READWRITE);
+        if ($res === false) return null;
+
+        // TODO handle error
+        // TODO use a callback function
+        //      and pass the resource in arg
+        $ret = fwrite($res, $message);
+        fclose($res);
+        if ($ret === false) return null;
+        return $ret;
     }
     public function get(string $jobId) {}
 }
