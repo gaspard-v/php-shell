@@ -1,13 +1,10 @@
 {
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
-    "ghcr.io/gaspard-v/features/php:1": {
+    "ghcr.io/gaspard-v/features/php-fpm:1": {
       "version": "8.4",
       "installComposer": true
     },
-    "ghcr.io/devcontainers-extra/features/http-server:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    }
+    "ghcr.io/gaspard-v/features/nginx:1": {}
   }
 }
