@@ -22,7 +22,9 @@ class SQLite implements Comm\CommInterface
     EOF;
 
     protected SQLite3 $db;
-    public function __construct()
+
+    protected static self $instance = null;
+    protected function __construct()
     {
         $tags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE;
         try {
@@ -33,13 +35,17 @@ class SQLite implements Comm\CommInterface
             throw $e;
         }
     }
-    public function send(
-        string $workerId,
-        string $jobId,
-        string $messageType,
-        int $size,
-        $message
-    ): ?int {
+
+    public static function inst(): self {
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
+        self::$instance = new self();
+        return self::$instance;
+    }
+
+    private static function getMessageInsertQuery(int $size): string
+    {
         $query = <<<EOF
         INSERT INTO 
             {${self::TABLENAME}}(
@@ -55,6 +61,16 @@ class SQLite implements Comm\CommInterface
             zeroblob({$size})
         )
         EOF;
+        return $query;
+    }
+
+    public function prepare(
+        string $workerId,
+        string $jobId,
+        string $messageType,
+        int $size
+    ): SendMessage {
+        $query = self::getMessageInsertQuery($size);
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':worker_id', $workerId, SQLITE3_TEXT);
         $stmt->bindValue(':job_id', $jobId, SQLITE3_TEXT);
@@ -62,18 +78,33 @@ class SQLite implements Comm\CommInterface
         $stmt->execute();
         $rowId = $this->db->lastInsertRowID();
 
-        if ($rowId <= 0) return null;
+        if ($rowId <= 0)
+            throw new SQLiteException('Unable to get the last inserted row id');
 
         $res = $this->db->openBlob(self::TABLENAME, 'message', $rowId, 'main', SQLITE3_OPEN_READWRITE);
-        if ($res === false) return null;
+        if ($res === false)
+            throw new SQLiteException("Unable to open blob row $rowId");
 
-        // TODO handle error
-        // TODO use a callback function
-        //      and pass the resource in arg
-        $ret = fwrite($res, $message);
-        fclose($res);
-        if ($ret === false) return null;
-        return $ret;
+        return new SendMessage($res);
     }
     public function get(string $jobId) {}
+    public function send(
+        string $workerId,
+        string $jobId,
+        string $messageType,
+        int $size,
+        mixed $message
+    ): int {
+        $stmt = $this->prepare(
+            $workerId,
+            $jobId,
+            $messageType,
+            $size
+        );
+        $callback = fn($resource) => fwrite($resource, $message);
+
+        $ret = $stmt->send($callback);
+        if ($ret === false) throw new SQLiteException("fwrite return false");
+        return $ret;
+    }
 }
