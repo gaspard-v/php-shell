@@ -1,13 +1,6 @@
-import "@xterm/xterm/css/xterm.css";
 import "./style.css";
-import { Terminal } from "@xterm/xterm";
-
-const term = new Terminal({
-  cursorBlink: true,
-  windowOptions: {
-    fullscreenWin: true,
-  },
-});
+import term from "./terminal";
 
 const app = document.getElementById("terminal");
+if (!app) return;
 term.open(app);
