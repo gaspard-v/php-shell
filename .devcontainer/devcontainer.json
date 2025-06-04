@@ -5,6 +5,7 @@
       "version": "8.4",
       "installComposer": true
     },
-    "ghcr.io/gaspard-v/features/nginx:1": {}
+    "ghcr.io/gaspard-v/features/nginx:1": {},
+    "ghcr.io/devcontainers/features/node:1": {}
   }
 }
