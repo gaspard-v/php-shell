@@ -13,8 +13,5 @@
             "name": "gaspard-v",
             "email": "60385905+gaspard-v@users.noreply.github.com"
         }
-    ],
-    "require": {
-        "twig/twig": "^3.0"
-    }
+    ]
 }
