@@ -2,13 +2,32 @@
 
 namespace GaspardV\PhpShell\Observable;
 
+use Set;
+
 abstract class AbstractObservable
 {
-    protected $listerners = [];
-    protected $item = null;
+    protected Set $listeners;
+    protected mixed $item;
 
-    public function subsriber($callback)
+    public function __construct()
     {
-        $this->listerners[] = $callback;
+        $this->listeners = new Set();
+    }
+
+    public function subscribe($callback): callable
+    {
+        $this->listeners->add($callback);
+        return fn() => $this->listeners->delete($callback);
+    }
+    public function getCurrentItem(): mixed
+    {
+        return $this->item;
+    }
+
+    public function notify(): void
+    {
+        foreach ($this->listeners as $listener) {
+            $listener($this->item);
+        }
     }
 }
