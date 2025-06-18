@@ -1,6 +1,6 @@
 <?php
 
-namespace GaspardV\PhpShell\Router;
+namespace GaspardV\PhpShell\Router\Objects;
 
 class Route
 {
